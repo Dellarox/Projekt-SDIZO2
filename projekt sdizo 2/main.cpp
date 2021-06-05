@@ -26,11 +26,12 @@ int main(){
         case 1:
             cout << "Podaj nazwę pliku: " << endl;
             cin >> fileName;
+            bool checker = g.fileReadGraph(fileName, true);
 
-            if (g.fileReadGraph(fileName, true)) {
+            if (!checker) {
                 cout << "Nie ma takiego pliku!" << endl;
                 system("pause");
-                break;
+                return 0;
             }
 
             cout << "1. Algorytm Prima." << endl;

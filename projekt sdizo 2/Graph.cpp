@@ -86,10 +86,12 @@ bool Graph::fileReadGraph(string fileName, bool isDirected) {
 					cout << "File error - READ EDGE" << endl;
 					break;
 				}
+			return true;
 		}
 		else
 			cout << "File error - READ INFO" << endl;
 		file.close();
+		return false;
 	}
 	else
 		cout << "File error - OPEN" << endl;
