@@ -1,8 +1,10 @@
 #include <iostream>
 #include <sstream>
 #include <fstream>
+#pragma once
 #include <vector>
 #include <list>
+#include <random>
 
 using namespace std;
 
@@ -29,8 +31,9 @@ public:
 
 	void primsAlgorithmForMatrix(bool isItTests);
 	void primsAlgorithmForList(bool isItTests);
-
 	void dijkstraAlgorithmForMatrix(bool isItTests);
 	void dijkstraAlgorithmForList(bool isItTests);
 	void showResult(vector<float> distance, vector<int> previousVertices);
+
+	void makeGraphForTestsWithDensity(int howMuchVertices, int whatDensity, bool isDirected);
 };

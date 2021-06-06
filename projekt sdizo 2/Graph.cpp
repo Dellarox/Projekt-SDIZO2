@@ -1,6 +1,5 @@
 #include "Graph.h"
 
-
 bool fileReadLine(ifstream& file, int tab[], int size) {
 	string s;
 	getline(file, s);
@@ -121,6 +120,8 @@ void Graph::showAdjacencyList() {
 	cout << endl;
 }
 
+//algorytmy
+
 void Graph::primsAlgorithmForMatrix(bool isItTests) {
 	vector<int> visitedVertices; // tworzê tablicê, w której bêd¹ przechowywane odwiedzone wierzcho³ki
 	int firstVertex = graphStart; // ustalam pierwszy wierzcho³ek (bêdzie on równie¿ odpowiada³ za wierzcho³ek, w którym aktualnie siê znajdujemy)
@@ -229,7 +230,8 @@ void Graph::dijkstraAlgorithmForMatrix(bool isItTests) {
 		}
 	}
 
-	showResult(distance, previousVertices);
+	if(!isItTests)
+		showResult(distance, previousVertices);
 }
 
 void Graph::dijkstraAlgorithmForList(bool isItTests) {
@@ -269,7 +271,8 @@ void Graph::dijkstraAlgorithmForList(bool isItTests) {
 		}
 	}
 
-	showResult(distance, previousVertices);
+	if (!isItTests)
+		showResult(distance, previousVertices);
 }
 
 void Graph::showResult(vector<float> distance, vector<int> previousVertices) {
@@ -294,5 +297,64 @@ void Graph::showResult(vector<float> distance, vector<int> previousVertices) {
 
 		displayInGoodOrder.clear();
 		displayInGoodOrder.resize(0);
+	}
+}
+
+//metody na robienie testów do sprawozdania
+
+void Graph::makeGraphForTestsWithDensity(int howMuchVertices, int whatDensity, bool isDirected) {
+	int howMuchEdges = (howMuchVertices * (howMuchVertices - 1) / 2) * whatDensity / 100; // obliczam ilosc krawedzi na podstawie gestosci i ilosci wierzcholkow
+
+	removeGraph(); // czyszczenie pamieci z poprzedniego grafu
+
+	graphEdges = howMuchEdges; // wlasciwosci nowego grafu
+	graphVertices = howMuchVertices;
+	graphStart = 0;
+	graphEnd = howMuchVertices-1;
+
+	weightMatrix.resize(graphVertices, vector<float>(graphVertices, infinity));
+	adjacencyList.resize(graphVertices);
+
+	vector<int> notAddedToGraph; // tworzê tablice, ktora bêdzie przechowywala wierzcholki jeszcze niedodane do grafu
+
+	for (int i = 0; i < howMuchVertices; i++) // pêtla dodaj¹ca wszystkie wierzcho³ki do jeszcze niedodanych do grafu
+		notAddedToGraph.push_back(i);
+
+	random_shuffle(notAddedToGraph.begin(), notAddedToGraph.end()); // losowanie, ¿eby za ka¿dym wywo³aniem funkcji dzia³o siê coœ innego
+
+	int addedEdges = 0; // zmienna bêdzie liczy³a ile ju¿ jest dodanych krawêdzi; bêdzie potrzebna przy dope³nianiu grafu krawêdziami w celu osi¹gniêcia odpowienij gêstoœci
+	vector<int> addedToGraph; // tworze tablice, w ktorej beda wierzcholki juz dodane do grafu
+
+	addElementToGraph(notAddedToGraph[notAddedToGraph.size() - 1], notAddedToGraph[notAddedToGraph.size() - 2], rand() % 100, isDirected); // dodaje now¹ krawedz do grafu; biorê pod uwagê ostatnie wierzcho³ki, poniewa¿ o wiele ³atwiej jest ich siê pozbyæ z vectora funckj¹ pop_back()
+	addedToGraph.push_back(notAddedToGraph.size() - 1); // dodaje do dodanych wierzcho³ek dodany
+	notAddedToGraph.pop_back(); // jak jest w komentarzu dwie linijki wyzej - usuwam ostatni element, przed chwika dodany
+	
+	addedEdges++; // zwiekszamy licznik dodanych krawedzi
+	// operacje wyzej nie s¹ w petli, poniewa¿ w petli krawedz dodajemy do juz dodanego wierzcholka do grafu, wiec potrzebujemy cos miec w tablicy addedToGraph
+
+	while (notAddedToGraph.size() > 0) {
+		addElementToGraph(notAddedToGraph[notAddedToGraph.size() - 1], addedToGraph[addedToGraph.size() - 1], rand() % 100, isDirected); // dodajemy krawedz do juz dodanego wierzcholka z jeszcze nie dodanego wierzcholka 
+		addedToGraph.push_back(notAddedToGraph.size() - 1); // dodajemy kolejny wierzcholek
+		notAddedToGraph.pop_back(); //usuwamy wierzcholek
+
+		addedEdges++; // zwiekszamy licznik dodanych krawedzi
+	}
+
+	int firstVertex, destinationVertex;
+
+	while (addedEdges < howMuchEdges) { // dope³niamy graf krawedziami, aby mial ich tyle, ile wymaga gêstoœæ
+		random_shuffle(addedToGraph.begin(), addedToGraph.end()); // znowu shuffluje wierzcholki
+		firstVertex = addedToGraph[addedToGraph.size() - 1]; // ustawiam ostatni
+		destinationVertex = addedToGraph[addedToGraph.size() - 2]; // ustawiam przedostatni
+
+		
+		while (weightMatrix[firstVertex][destinationVertex] != infinity && weightMatrix[destinationVertex][firstVertex] != infinity) { // dopoki pojawia sie wartosc infinity (czyli krawedz nie istnieje)
+			random_shuffle(addedToGraph.begin(), addedToGraph.end()); // analogicznie jak na pocz¹tku pierwszej pêtli while
+			firstVertex = addedToGraph[addedToGraph.size() - 1]; 
+			destinationVertex = addedToGraph[addedToGraph.size() - 2]; 
+		} // i ponownie sprawdzamy czy istnieje juz ta krawedz
+
+		addElementToGraph(firstVertex, destinationVertex, rand() % 100, isDirected); // dodajemy krawedz jeszcze nieistniejaca
+		addedEdges++; // zwiekszamy licznik dodanych krawedzi
 	}
 }
